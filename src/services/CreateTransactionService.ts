@@ -8,8 +8,22 @@ class CreateTransactionService {
     this.transactionsRepository = transactionsRepository;
   }
 
-  public execute(): Transaction {
-    // TODO
+  public execute({ title, value, type }: Transaction): Transaction {
+    if (type !== 'income' && type !== 'outcome') {
+      throw Error('Type is invalid.');
+    }
+    if (value < 0) {
+      throw Error('Value can´t be negative.');
+    }
+
+    const balance = this.transactionsRepository.getBalance();
+    if (type === 'outcome' && value > balance.total) {
+      throw Error('You don´t have money to buy this.');
+    }
+
+    const transaction: Transaction = new Transaction({ title, value, type });
+    this.transactionsRepository.create(transaction);
+    return transaction;
   }
 }
 
